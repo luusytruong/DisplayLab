@@ -50,7 +50,9 @@ final class StatusPanelController: NSObject {
         // Remembers where the user ⌘-drags the icon (e.g. out from under the notch) across launches.
         statusItem.autosaveName = "DisplayLab"
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "display", accessibilityDescription: "DisplayLab")
+            // Slightly larger than the default symbol size so it reads well on the taller notch-era menu bar.
+            button.image = NSImage(systemSymbolName: "display", accessibilityDescription: "DisplayLab")?
+                .withSymbolConfiguration(.init(pointSize: 16, weight: .medium))
             button.target = self
             button.action = #selector(toggle)
             // Open on mouse-down like NSMenu-based items (Docker, Telegram), not on mouse-up.

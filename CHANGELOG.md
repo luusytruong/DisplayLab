@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2 — 2026-11-15
+
+- Larger menu bar icon (16 pt, medium weight) so it matches other items on the taller menu bar.
+
 ## 1.0.1 — 2026-11-15
 
 - Security: the admin-privileged override write no longer copies from a temp file in a
