@@ -17,9 +17,10 @@ func drawIcon() {
     let tile = rounded(NSRect(x: 100, y: 100, width: 824, height: 824), 185)
     NSGraphicsContext.saveGraphicsState()
     let shadow = NSShadow()
-    shadow.shadowColor = NSColor.black.withAlphaComponent(0.28)
-    shadow.shadowOffset = NSSize(width: 0, height: -12)
-    shadow.shadowBlurRadius = 28
+    // Must fade out well inside the 100pt margin, or it gets cut off square at the canvas edge.
+    shadow.shadowColor = NSColor.black.withAlphaComponent(0.18)
+    shadow.shadowOffset = NSSize(width: 0, height: -5)
+    shadow.shadowBlurRadius = 10
     shadow.set()
     NSColor.white.setFill()
     tile.fill()

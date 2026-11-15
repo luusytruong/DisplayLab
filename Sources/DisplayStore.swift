@@ -129,7 +129,7 @@ final class DisplayStore: ObservableObject {
         onModeWillChange?()
         var config: CGDisplayConfigRef?
         guard CGBeginDisplayConfiguration(&config) == .success else {
-            message = "Không mở được cấu hình màn hình."
+            message = L("Couldn't open the display configuration.")
             onModeDidChange?(false)
             return
         }
@@ -137,7 +137,7 @@ final class DisplayStore: ObservableObject {
         let result = CGCompleteDisplayConfiguration(config, .permanently)
         if result != .success {
             CGCancelDisplayConfiguration(config)
-            message = "Đổi độ phân giải thất bại (mã \(result.rawValue))."
+            message = L("Couldn't change the resolution (code %@).", String(result.rawValue))
         } else {
             message = nil
         }
@@ -158,10 +158,11 @@ final class DisplayStore: ObservableObject {
                 vendor: CGDisplayVendorNumber(id), product: CGDisplayModelNumber(id),
                 nativeWidth: native.width, nativeHeight: native.height)
             if added == 0 {
-                message = "Đã đủ mode mở rộng, không cần ghi thêm."
+                message = L("Extended modes are already complete; nothing to write.")
             } else {
-                let reload = isBuiltin ? "Đăng xuất hoặc khởi động lại" : "Rút cắm lại màn hình (hoặc đăng xuất)"
-                message = "Đã thêm \(added) mode. \(reload) để macOS nạp."
+                message = isBuiltin
+                    ? L("Added %@ modes. Log out or restart so macOS loads them.", String(added))
+                    : L("Added %@ modes. Reconnect the display (or log out) so macOS loads them.", String(added))
             }
         } catch {
             message = error.localizedDescription
@@ -173,6 +174,6 @@ final class DisplayStore: ObservableObject {
         let screen = NSScreen.screens.first {
             ($0.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value == id
         }
-        return screen?.localizedName ?? "Màn hình \(id)"
+        return screen?.localizedName ?? L("Display %@", String(id))
     }
 }

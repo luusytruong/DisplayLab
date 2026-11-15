@@ -12,13 +12,13 @@ struct MenuView: View {
             header
             if store.screens.count > 1 {
                 Picker("", selection: $store.selectedID) {
-                    ForEach(store.screens) { Text($0.isBuiltin ? "Tích hợp" : $0.name).tag($0.id) }
+                    ForEach(store.screens) { Text($0.isBuiltin ? L("Built-in") : $0.name).tag($0.id) }
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
             }
             if store.modes.isEmpty {
-                Text("Không đọc được mode của màn hình này. Thử bấm “Bổ sung mode mở rộng”.")
+                Text(L("Couldn't read this display's modes. Try “Add extended modes”."))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 4)
@@ -37,6 +37,8 @@ struct MenuView: View {
         }
         .padding(12)
         .frame(width: 300)
+        // No keyboard focus ring on the first chip when the panel opens (it reads as "selected").
+        .focusEffectDisabled()
         .onAppear {
             store.reload()
             syncSlider(animated: false)
@@ -53,16 +55,19 @@ struct MenuView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Image(systemName: store.selectedScreen?.isBuiltin == false ? "display" : "laptopcomputer")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 30, height: 30)
-                .background(Circle().fill(Color.accentColor))
+            // The app icon (white tile, monitor with slider); its artwork has macOS's standard
+            // transparent margin, so the frame is a bit larger than the visible tile.
+            Image(nsImage: NSImage(named: "AppIcon") ?? NSApp.applicationIconImage)
+                .resizable()
+                .interpolation(.high)
+                .frame(width: 38, height: 38)
+                .padding(-4)
             VStack(alignment: .leading, spacing: 0) {
-                Text(store.selectedScreen.map { $0.isBuiltin ? "Màn hình tích hợp" : $0.name } ?? "Màn hình")
+                Text(store.selectedScreen.map { $0.isBuiltin ? L("Built-in Display") : $0.name } ?? L("Display"))
                     .font(.system(size: 13, weight: .semibold))
                     .lineLimit(1)
-                Text("Gốc \(String(store.native.width)) × \(String(store.native.height)) · \(String(Int(store.currentSize.refresh.rounded()))) Hz")
+                Text(L("Native %@ × %@ · %@ Hz", String(store.native.width), String(store.native.height),
+                       String(Int(store.currentSize.refresh.rounded()))))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
@@ -74,7 +79,7 @@ struct MenuView: View {
                 .padding(.horizontal, 7)
                 .padding(.vertical, 3)
                 .background(Capsule().fill(Color.primary.opacity(0.06)))
-                .help("Phím tắt mở bảng này, kể cả khi icon bị ẩn trên menu bar")
+                .help(L("Shortcut to open this panel, even when the menu bar icon is hidden"))
         }
         .padding(.horizontal, 4)
         .padding(.top, 2)
@@ -103,27 +108,22 @@ struct MenuView: View {
                         .foregroundStyle(badge.color)
                 }
             }
-            Text(dragging ? "Thả tay để áp dụng"
-                 : String(format: "Độ nét %d%% · %.2f px mỗi điểm", Int((density / 2 * 100).rounded()), density))
+            Text(dragging ? L("Release to apply")
+                 : L("Sharpness %@%% · %@ px per point", String(Int((density / 2 * 100).rounded())),
+                     String(format: "%.2f", density)))
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
                 .padding(.top, 2)
-                .help("Số điểm ảnh thật của màn hình cho mỗi điểm giao diện. 2.00 = Retina 2x, nét nhất; càng thấp thì mỗi chữ càng ít điểm ảnh nên càng kém nét.")
+                .help(L("Real display pixels per UI point. 2.00 = Retina 2x, the sharpest; the lower it is, the fewer pixels each letter gets and the softer text looks."))
 
             HStack(spacing: 8) {
-                Image(systemName: "textformat.size.larger")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .help("Chữ to")
+                sizeGlyph(size: 16).help(L("Larger text"))
                 CapsuleSlider(index: $slider, count: store.modes.count) { editing in
                     dragging = editing
                     if !editing, let mode = modeAtSlider { store.apply(mode) }
                 }
                 .disabled(store.modes.count < 2)
-                Image(systemName: "textformat.size.smaller")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .help("Nhiều không gian")
+                sizeGlyph(size: 11).help(L("More space"))
             }
             .padding(.top, 14)
         }
@@ -154,7 +154,7 @@ struct MenuView: View {
             Divider().padding(.horizontal, 6).padding(.bottom, 4)
 
             Button { launchAtLogin.toggle() } label: {
-                rowLabel("Mở cùng macOS", icon: "power") {
+                rowLabel(L("Open at login"), icon: "power") {
                     Toggle("", isOn: $launchAtLogin)
                         .toggleStyle(.switch)
                         .controlSize(.mini)
@@ -164,18 +164,18 @@ struct MenuView: View {
             .onChange(of: launchAtLogin) { setLaunchAtLogin(launchAtLogin) }
 
             Button { store.installExtendedModes() } label: {
-                rowLabel("Bổ sung mode mở rộng", icon: "square.stack.3d.up") {
-                    Text(store.overrideCount.map(String.init) ?? "Chưa có")
+                rowLabel(L("Add extended modes"), icon: "square.stack.3d.up") {
+                    Text(store.overrideCount.map(String.init) ?? L("None"))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
             }
-            .help("Ghi thêm bậc 16 point vào override plist của macOS (cần quyền admin nếu file chưa có)")
+            .help(L("Adds 16-point HiDPI steps to macOS's display override file (asks for an admin password if the file doesn't exist yet)"))
 
             Button {
                 NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Displays-Settings.extension")!)
             } label: {
-                rowLabel("Cài đặt Màn hình…", icon: "gearshape") {
+                rowLabel(L("Display Settings…"), icon: "gearshape") {
                     Image(systemName: "arrow.up.right")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(.tertiary)
@@ -183,7 +183,7 @@ struct MenuView: View {
             }
 
             Button { NSApp.terminate(nil) } label: {
-                rowLabel("Thoát", icon: "xmark.circle") {
+                rowLabel(L("Quit"), icon: "xmark.circle") {
                     Text("⌘Q").foregroundStyle(.tertiary)
                 }
             }
@@ -209,12 +209,20 @@ struct MenuView: View {
 
     private func badge(for mode: Mode?, width: Int) -> (title: String, icon: String, color: Color)? {
         if width * 2 == store.native.width, mode?.hiDPI ?? true {
-            return ("Nét nhất", "sparkles", .green)
+            return (L("Sharpest"), "sparkles", .green)
         }
         guard let mode, !mode.hiDPI else { return nil }
         return mode.width == store.native.width
-            ? ("Gốc", "checkmark.circle", .secondary)
-            : ("Không HiDPI", "exclamationmark.triangle", .orange)
+            ? (L("Native"), "checkmark.circle", .secondary)
+            : (L("Not HiDPI"), "exclamationmark.triangle", .orange)
+    }
+
+    /// Big "A" (larger text) / small "A" (more space) flanking the slider, in equal-width slots.
+    private func sizeGlyph(size: CGFloat) -> some View {
+        Text(verbatim: "A")
+            .font(.system(size: size, weight: .semibold, design: .rounded))
+            .foregroundStyle(.secondary)
+            .frame(width: 16)
     }
 
     private var modeAtSlider: Mode? {
@@ -235,7 +243,7 @@ struct MenuView: View {
         do {
             try on ? service.register() : service.unregister()
         } catch {
-            store.message = "Không bật được mở cùng macOS: \(error.localizedDescription)"
+            store.message = L("Couldn't turn on Open at login: %@", error.localizedDescription)
             launchAtLogin = service.status == .enabled
         }
     }

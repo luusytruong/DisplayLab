@@ -21,7 +21,7 @@ enum OverrideInstaller {
     /// Returns how many entries were added (0 = already complete, nothing written).
     @discardableResult
     static func install(vendor: UInt32, product: UInt32, nativeWidth: Int, nativeHeight: Int) throws -> Int {
-        guard nativeWidth > 0, nativeHeight > 0 else { throw Failure(errorDescription: "Không đọc được độ phân giải gốc.") }
+        guard nativeWidth > 0, nativeHeight > 0 else { throw Failure(errorDescription: L("Couldn't read the native resolution.")) }
         let dest = url(vendor: vendor, product: product)
         var dict = load(dest) ?? [:]
         dict["DisplayVendorID"] = vendor
@@ -60,7 +60,7 @@ enum OverrideInstaller {
         if let error {
             let text = (error[NSAppleScript.errorMessage] as? String) ?? ""
             let cancelled = (error[NSAppleScript.errorNumber] as? Int) == -128
-            throw Failure(errorDescription: cancelled ? "Đã huỷ nhập mật khẩu admin." : "Không ghi được file override. \(text)")
+            throw Failure(errorDescription: cancelled ? L("The admin password prompt was cancelled.") : L("Couldn't write the override file. %@", text))
         }
         return added
     }

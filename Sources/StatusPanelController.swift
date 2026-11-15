@@ -37,6 +37,9 @@ final class StatusPanelController: NSObject {
     private var lastClosed = Date.distantPast
     private var observers: [(NotificationCenter, NSObjectProtocol)] = []
     private var hotKey: HotKey?
+    private var iconClickMonitor: Any?
+    private var outsideClickMonitor: Any?
+    private var menuTracking = false
     /// True while the panel is hidden for a resolution switch; it reappears once the new
     /// screen geometry is reported (re-anchoring on menu bar moves stays as the fallback).
     private var switching = false
@@ -50,13 +53,27 @@ final class StatusPanelController: NSObject {
         // Remembers where the user ⌘-drags the icon (e.g. out from under the notch) across launches.
         statusItem.autosaveName = "DisplayLab"
         if let button = statusItem.button {
-            // Slightly larger than the default symbol size so it reads well on the taller notch-era menu bar.
-            button.image = NSImage(systemSymbolName: "display", accessibilityDescription: "DisplayLab")?
-                .withSymbolConfiguration(.init(pointSize: 16, weight: .medium))
-            button.target = self
-            button.action = #selector(toggle)
-            // Open on mouse-down like NSMenu-based items (Docker, Telegram), not on mouse-up.
-            button.sendAction(on: [.leftMouseDown, .rightMouseDown])
+            button.image = Self.menuBarIcon()
+        }
+
+        // Handle clicks on the icon ourselves, on mouse-down, and swallow them: if NSStatusBarButton
+        // ran its own click tracking it would clear the highlight on mouse-up, so the icon would
+        // flicker instead of staying lit while the panel is open (same approach as FluidMenuBarExtra).
+        // ⌘-clicks pass through so the icon can still be ⌘-dragged to another spot.
+        iconClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            let onIcon = event.window != nil && !event.modifierFlags.contains(.command)
+            let windowNumber = event.windowNumber
+            let handled = MainActor.assumeIsolated { () -> Bool in
+                guard onIcon, let self, windowNumber == self.statusItem.button?.window?.windowNumber else { return false }
+                self.toggle()
+                return true
+            }
+            return handled ? nil : event
+        }
+        // A click in another app (including another menu bar item) closes the panel, which, being
+        // non-activating, doesn't always lose key status on its own.
+        outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            MainActor.assumeIsolated { self?.close() }
         }
 
         let effect = NSVisualEffectView()
@@ -93,7 +110,7 @@ final class StatusPanelController: NSObject {
         }
     }
 
-    @objc func toggle() {
+    func toggle() {
         if panel.isVisible {
             close()
             return
@@ -110,6 +127,17 @@ final class StatusPanelController: NSObject {
         reposition()
         panel.makeKeyAndOrderFront(nil)
         statusItem.button?.highlight(true)
+        setMenuTracking(true)
+    }
+
+    /// While "menu tracking" is on, macOS keeps an auto-hidden menu bar (full-screen apps) visible,
+    /// exactly as it does for a real menu, so the panel doesn't lose its icon above it.
+    private func setMenuTracking(_ on: Bool) {
+        guard on != menuTracking else { return }
+        menuTracking = on
+        let name = on ? "com.apple.HIToolbox.beginMenuTrackingNotification"
+                      : "com.apple.HIToolbox.endMenuTrackingNotification"
+        DistributedNotificationCenter.default().post(name: Notification.Name(name), object: nil)
     }
 
     private func beginSwitch() {
@@ -129,6 +157,7 @@ final class StatusPanelController: NSObject {
         panel.orderOut(nil)
         lastClosed = Date()
         statusItem.button?.highlight(false)
+        setMenuTracking(false)
     }
 
     private func resize(to size: CGSize) {
@@ -167,6 +196,35 @@ final class StatusPanelController: NSObject {
             MainActor.assumeIsolated { if let self { handler(self) } }
         }
         observers.append((center, token))
+    }
+
+    /// Template (monochrome) version of the app icon: a monitor with the slider inside.
+    private static func menuBarIcon() -> NSImage {
+        // Drawn on an 18×15 grid, scaled ×1.2 to 18pt tall (the height of typical menu bar icons, e.g. Docker).
+        let scale: CGFloat = 1.2
+        let image = NSImage(size: NSSize(width: 18 * scale, height: 15 * scale), flipped: false) { _ in
+            let transform = NSAffineTransform()
+            transform.scale(by: scale)
+            transform.concat()
+            NSColor.black.set()
+            // Bezel outline (~1.6pt stroke after scaling)
+            let bezel = NSBezierPath(roundedRect: NSRect(x: 0.75, y: 4.25, width: 16.5, height: 10), xRadius: 2.5, yRadius: 2.5)
+            bezel.lineWidth = 1.35
+            bezel.stroke()
+            // Stand
+            NSBezierPath(rect: NSRect(x: 8, y: 1.5, width: 2, height: 2.75)).fill()
+            NSBezierPath(roundedRect: NSRect(x: 5, y: 0.5, width: 8, height: 1.5), xRadius: 0.75, yRadius: 0.75).fill()
+            // Slider: filled part, faint rest of the track, knob
+            NSBezierPath(roundedRect: NSRect(x: 3.5, y: 8.5, width: 6.5, height: 1.5), xRadius: 0.75, yRadius: 0.75).fill()
+            NSColor.black.withAlphaComponent(0.35).set()
+            NSBezierPath(roundedRect: NSRect(x: 10, y: 8.5, width: 4.5, height: 1.5), xRadius: 0.75, yRadius: 0.75).fill()
+            NSColor.black.set()
+            NSBezierPath(ovalIn: NSRect(x: 8.25, y: 7.25, width: 4, height: 4)).fill()
+            return true
+        }
+        image.isTemplate = true
+        image.accessibilityDescription = "DisplayLab"
+        return image
     }
 
     private static func roundedMask(radius: CGFloat) -> NSImage {

@@ -9,6 +9,7 @@ rm -rf "$APP" build/obj
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" build/obj
 cp Info.plist "$APP/Contents/Info.plist"
 cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"  # regenerate: see scripts/make-icon.swift
+cp -R Resources/*.lproj "$APP/Contents/Resources/"   # en (development language) + vi
 
 for arch in arm64 x86_64; do
     swiftc -O -parse-as-library -swift-version 5 \

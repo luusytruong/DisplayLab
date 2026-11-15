@@ -1,0 +1,32 @@
+/* Vietnamese. Keys are the English UI text. */
+
+"Couldn't open the display configuration." = "Không mở được cấu hình màn hình.";
+"Couldn't change the resolution (code %@)." = "Đổi độ phân giải thất bại (mã %@).";
+"Extended modes are already complete; nothing to write." = "Đã đủ mode mở rộng, không cần ghi thêm.";
+"Added %@ modes. Log out or restart so macOS loads them." = "Đã thêm %@ mode. Đăng xuất hoặc khởi động lại để macOS nạp.";
+"Added %@ modes. Reconnect the display (or log out) so macOS loads them." = "Đã thêm %@ mode. Rút cắm lại màn hình (hoặc đăng xuất) để macOS nạp.";
+"Display %@" = "Màn hình %@";
+"Built-in" = "Tích hợp";
+"Couldn't read this display's modes. Try “Add extended modes”." = "Không đọc được mode của màn hình này. Thử bấm “Bổ sung mode mở rộng”.";
+"Built-in Display" = "Màn hình tích hợp";
+"Display" = "Màn hình";
+"Native %@ × %@ · %@ Hz" = "Gốc %@ × %@ · %@ Hz";
+"Shortcut to open this panel, even when the menu bar icon is hidden" = "Phím tắt mở bảng này, kể cả khi icon bị ẩn trên menu bar";
+"Release to apply" = "Thả tay để áp dụng";
+"Sharpness %@%% · %@ px per point" = "Độ nét %@%% · %@ px mỗi điểm";
+"Real display pixels per UI point. 2.00 = Retina 2x, the sharpest; the lower it is, the fewer pixels each letter gets and the softer text looks." = "Số điểm ảnh thật của màn hình cho mỗi điểm giao diện. 2.00 = Retina 2x, nét nhất; càng thấp thì mỗi chữ càng ít điểm ảnh nên càng kém nét.";
+"Larger text" = "Chữ to";
+"More space" = "Nhiều không gian";
+"Open at login" = "Mở cùng macOS";
+"Add extended modes" = "Bổ sung mode mở rộng";
+"None" = "Chưa có";
+"Adds 16-point HiDPI steps to macOS's display override file (asks for an admin password if the file doesn't exist yet)" = "Ghi thêm bậc 16 point vào override plist của macOS (cần quyền admin nếu file chưa có)";
+"Display Settings…" = "Cài đặt Màn hình…";
+"Quit" = "Thoát";
+"Sharpest" = "Nét nhất";
+"Native" = "Gốc";
+"Not HiDPI" = "Không HiDPI";
+"Couldn't turn on Open at login: %@" = "Không bật được mở cùng macOS: %@";
+"Couldn't read the native resolution." = "Không đọc được độ phân giải gốc.";
+"The admin password prompt was cancelled." = "Đã huỷ nhập mật khẩu admin.";
+"Couldn't write the override file. %@" = "Không ghi được file override. %@";

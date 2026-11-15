@@ -29,7 +29,7 @@ using only macOS's own display mechanisms. No license key, no network, no backgr
 - **Global shortcut ⌃⌥⌘D** — opens the panel even when the icon is hidden behind the notch.
 - **Launch at login**, light/dark mode, ~850 lines of Swift, universal binary (Apple Silicon + Intel).
 
-> The interface is currently in Vietnamese. Translations are welcome.
+> Available in English and Vietnamese (follows your macOS language). Translations are welcome: add `Resources/<lang>.lproj/Localizable.strings`.
 
 ## Requirements
 

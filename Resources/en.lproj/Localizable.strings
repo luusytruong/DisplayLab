@@ -1,0 +1,32 @@
+/* English is the development language: keys are used as-is. */
+
+"Couldn't open the display configuration." = "Couldn't open the display configuration.";
+"Couldn't change the resolution (code %@)." = "Couldn't change the resolution (code %@).";
+"Extended modes are already complete; nothing to write." = "Extended modes are already complete; nothing to write.";
+"Added %@ modes. Log out or restart so macOS loads them." = "Added %@ modes. Log out or restart so macOS loads them.";
+"Added %@ modes. Reconnect the display (or log out) so macOS loads them." = "Added %@ modes. Reconnect the display (or log out) so macOS loads them.";
+"Display %@" = "Display %@";
+"Built-in" = "Built-in";
+"Couldn't read this display's modes. Try “Add extended modes”." = "Couldn't read this display's modes. Try “Add extended modes”.";
+"Built-in Display" = "Built-in Display";
+"Display" = "Display";
+"Native %@ × %@ · %@ Hz" = "Native %@ × %@ · %@ Hz";
+"Shortcut to open this panel, even when the menu bar icon is hidden" = "Shortcut to open this panel, even when the menu bar icon is hidden";
+"Release to apply" = "Release to apply";
+"Sharpness %@%% · %@ px per point" = "Sharpness %@%% · %@ px per point";
+"Real display pixels per UI point. 2.00 = Retina 2x, the sharpest; the lower it is, the fewer pixels each letter gets and the softer text looks." = "Real display pixels per UI point. 2.00 = Retina 2x, the sharpest; the lower it is, the fewer pixels each letter gets and the softer text looks.";
+"Larger text" = "Larger text";
+"More space" = "More space";
+"Open at login" = "Open at login";
+"Add extended modes" = "Add extended modes";
+"None" = "None";
+"Adds 16-point HiDPI steps to macOS's display override file (asks for an admin password if the file doesn't exist yet)" = "Adds 16-point HiDPI steps to macOS's display override file (asks for an admin password if the file doesn't exist yet)";
+"Display Settings…" = "Display Settings…";
+"Quit" = "Quit";
+"Sharpest" = "Sharpest";
+"Native" = "Native";
+"Not HiDPI" = "Not HiDPI";
+"Couldn't turn on Open at login: %@" = "Couldn't turn on Open at login: %@";
+"Couldn't read the native resolution." = "Couldn't read the native resolution.";
+"The admin password prompt was cancelled." = "The admin password prompt was cancelled.";
+"Couldn't write the override file. %@" = "Couldn't write the override file. %@";
