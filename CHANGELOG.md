@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 — 2026-11-15
+
+- Security: the admin-privileged override write no longer copies from a temp file in a
+  user-writable folder (which another process could swap for a symlink); the plist bytes
+  are passed to the privileged command inline instead.
+
 ## 1.0.0 — 2026-11-15
 
 First public release.

@@ -49,9 +49,12 @@ enum OverrideInstaller {
         if FileManager.default.isWritableFile(atPath: dest.path), (try? data.write(to: dest)) != nil {
             return added
         }
-        let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("displaylab-override.plist")
-        try data.write(to: tmp, options: .atomic)
-        let shell = "mkdir -p '\(dest.deletingLastPathComponent().path)' && cp '\(tmp.path)' '\(dest.path)' && chmod 644 '\(dest.path)'"
+        // Hand the bytes to root inline (base64 has no quote characters) rather than via a temp
+        // file, so root never reads from a user-writable location that could be swapped for a symlink.
+        // `dest` is built only from fixed path parts and the numeric vendor/product IDs.
+        let shell = "mkdir -p '\(dest.deletingLastPathComponent().path)'"
+            + " && printf %s '\(data.base64EncodedString())' | /usr/bin/base64 -D -o '\(dest.path)'"
+            + " && chmod 644 '\(dest.path)'"
         var error: NSDictionary?
         NSAppleScript(source: "do shell script \"\(shell)\" with administrator privileges")?.executeAndReturnError(&error)
         if let error {
